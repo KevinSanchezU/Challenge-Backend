@@ -100,7 +100,7 @@ def add_file():
     try:
         file = request.files["mock_file"]
         name_for_s3 = secure_filename(file.filename)
-        key_bucket = os.path.join(current_user,name_for_s3)
+        key_bucket = os.path.join(f"{current_user}/",name_for_s3)
         s3_client.upload_fileobj(file,bucket_name, key_bucket)
 
     except Exception:
@@ -114,11 +114,9 @@ def add_file():
 @jwt_required()
 def download_file(file_name):
     current_user = get_jwt_identity()
-    print(f"Usuario {current_user}")
     download_path = os.path.join("downloads/", file_name)
-    print(f"Path para descargar: {download_path}")
     key_bucket = os.path.join(f"{current_user}/",file_name)
-    print(f"Key Bucket: {key_bucket}")
+    
     try:
         s3_client.download_file(bucket_name, key_bucket, download_path)
     except NoCredentialsError:
