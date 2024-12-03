@@ -34,7 +34,7 @@ app = Flask(__name__)
 
 # Seteando jwt-extended
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1) # Seteo la expiracion del token a 1 hora
 jwt = JWTManager(app)
 
 # Funcion que verifica si es admin
@@ -48,9 +48,7 @@ def admin_required():
                 return fn(*args, **kwargs)
             else:
                 return jsonify(msg="Admins only!"), 403
-
         return decorator
-
     return wrapper
 
 
@@ -68,12 +66,12 @@ def login():
     if username == "admin" and password == "admin":
         access_token = create_access_token(
         "admin_user", additional_claims={"is_administrator": True})
-        return jsonify(access_token=access_token)
+        return jsonify(access_token=access_token),200
     
     if username != "usuario1" or password != "1234":
         return jsonify({"message": "Bad username or password"}), 401
     access_token = create_access_token(identity=username, additional_claims={"is_administrator": False})
-    return jsonify(access_token=access_token)
+    return jsonify(access_token=access_token),200
 
 # Ruta con los archivos subidos
 @app.route("/access_granted", methods=["GET"])
@@ -92,7 +90,7 @@ def list_files():
                 })
         return jsonify (objects_list), 200
     else:
-        return jsonify({"message": "There is no files"})
+        return jsonify({"message": "There is no files"}), 204
 
 # Ruta para subir archivos
 @app.route("/access_granted", methods=["POST"])
@@ -106,17 +104,10 @@ def add_file():
         s3_client.upload_fileobj(file,bucket_name, key_bucket)
 
     except Exception:
-        return jsonify({"error":"There was a problem with the file"}), 400 # Comprende que np se elegio archivo
-    except NoCredentialsError: # El rol en S3 no tiene los permisos necesarios
+        return jsonify({"error":"There was a problem with the file"}), 400 # Comprende que no se elegio archivo
+    except NoCredentialsError: # El rol en amazon S3 no tiene los permisos necesarios
         return jsonify({"error": "S3 credentials not available"}), 500
     return jsonify({"message":"File uploaded"}), 201
-
-
-# Ruta para eliminar en base al nombre
-@app.route("/access_granted/<string:file_name>", methods=["DELETE"])
-def delete_file(file_name):
-    return jsonify({"message":"File deleted"})
-
 
 # Ruta para descargar en base al nombre
 @app.route("/access_granted/<string:file_name>", methods=["GET"])
@@ -131,14 +122,19 @@ def download_file(file_name):
     try:
         s3_client.download_file(bucket_name, key_bucket, download_path)
     except NoCredentialsError:
-        return jsonify({"error": " S3 credentials not available"}), 500 # El rol en S3 no tiene los permisos necesarios
+        return jsonify({"error": " S3 credentials not available"}), 500 # El rol en amazon S3 no tiene los permisos necesarios
     return jsonify({"message":f"File {file_name} downloaded"}),200
 
 
 @app.route("/stats")
 @admin_required()
 def stats():
-    return jsonify({"message": "All the users who upload something today"})
+    return jsonify({"message": "All the users who upload something today"}),200
+
+# Ruta para eliminar en base al nombre
+@app.route("/access_granted/<string:file_name>", methods=["DELETE"])
+def delete_file(file_name):
+    return jsonify({"message":"File deleted"}),204
 
 if __name__ == "__main__":
     app.run(debug=True)
