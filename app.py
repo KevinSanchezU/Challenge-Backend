@@ -57,7 +57,7 @@ def admin_required():
 @app.route("/", methods=["GET"])
 def home():
     #Login
-    return jsonify({"message":"SIRIUS CHALLENGE, please introduce your user and password"})
+    return jsonify({"message":"BACKEND CHALLENGE, please introduce your user and password"})
 
 @app.route("/", methods=["POST"])
 def login():
@@ -130,9 +130,9 @@ def stats():
     return jsonify({"message": "All the users who upload something today"}),200
 
 # Ruta para eliminar en base al nombre
-@app.route("/access_granted/<string:file_name>", methods=["DELETE"])
-def delete_file(file_name):
-    return jsonify({"message":"File deleted"}),204
+#@app.route("/access_granted/<string:file_name>", methods=["DELETE"])
+#def delete_file(file_name):
+#    return jsonify({"message":"File deleted"}),204
 
 if __name__ == "__main__":
     app.run(debug=True)
