@@ -57,7 +57,7 @@ def admin_required():
 @app.route("/", methods=["GET"])
 def home():
     #Login
-    return jsonify({"message":"BACKEND CHALLENGE, please introduce your user and password"})
+    return jsonify({"message":"BACKEND CHALLENGE, please introduce your user and password"}),200
 
 @app.route("/", methods=["POST"])
 def login():
